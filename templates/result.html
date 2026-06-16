@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+{% block title %}おすすめ候補 | Outing Recommend{% endblock %}
+
+{% block content %}
+<section class="page-shell result-shell">
+
+  <div class="result-header">
+    <div>
+      <p class="eyebrow">Recommended Courses</p>
+      <h1>{{ plans|length }}件の1日コース</h1>
+
+      <!-- 現在地 + 天気サマリー -->
+      <div class="location-weather-bar">
+        {% if search.user_lat and search.user_lon %}
+        <div class="lw-item lw-gps">
+          <span class="lw-icon">📍</span>
+          <span class="lw-label">現在地</span>
+          <span class="lw-value">{{ weather.location_name or search.place }}</span>
+          <span class="lw-gps-badge">GPS</span>
+        </div>
+        {% else %}
+        <div class="lw-item">
+          <span class="lw-icon">📍</span>
+          <span class="lw-label">エリア</span>
+          <span class="lw-value">{{ search.place }}</span>
+        </div>
+        {% endif %}
+        <div class="lw-item">
+          <span class="lw-icon">{{ weather.weather_icon or "🌤" }}</span>
+          <span class="lw-label">天気</span>
+          <span class="lw-value">{{ weather.condition }}</span>
+        </div>
+        {% if weather.temperature and weather.temperature != "--" %}
+        <div class="lw-item">
+          <span class="lw-icon">🌡</span>
+          <span class="lw-label">気温</span>
+          <span class="lw-value">{{ weather.temperature }}℃</span>
+        </div>
+        {% endif %}
+        <div class="lw-item {% if weather.rain_chance|string != '--' and weather.rain_chance|int >= 50 %}lw-rainy{% endif %}">
+          <span class="lw-icon">🌂</span>
+          <span class="lw-label">降水確率</span>
+          <span class="lw-value">{{ weather.rain_chance }}%</span>
+        </div>
+      </div>
+
+      <!-- 天気アイコン詳細（旧デザイン、小さめに残す） -->
+      <div class="weather-summary-row">
+        <span class="weather-icon-lg" title="{{ weather.condition }}">{{ weather.weather_icon or "🌤" }}</span>
+        <div class="weather-detail">
+          <span class="weather-location">{{ weather.location_name }}</span>
+          <span class="weather-cond">{{ weather.condition }}</span>
+          {% if weather.temperature and weather.temperature != "--" %}
+          <span class="weather-temp">{{ weather.temperature }}℃</span>
+          {% endif %}
+          <span class="weather-rain {% if weather.rain_chance|string != '--' and weather.rain_chance|int >= 50 %}is-rainy{% endif %}">
+            🌂 {{ weather.rain_chance }}%
+          </span>
+          {% if weather.source and weather.source != "fallback" %}
+          <span class="weather-source">{{ weather.source }}</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="result-conditions">
+      <div class="rc-item"><span class="rc-label">📍 エリア</span><span class="rc-value">{{ search.place }}</span></div>
+      <div class="rc-item"><span class="rc-label">👥 同行者</span><span class="rc-value">{{ search.people }}</span></div>
+      <div class="rc-item"><span class="rc-label">🕐 時間</span><span class="rc-value">{{ search.start_time }}〜{{ search.end_time }}</span></div>
+      <div class="rc-item rc-duration"><span class="rc-label">⏱ 滞在可能</span><span class="rc-value">{% if duration %}{% set h = duration | int %}{% set m = ((duration - h) * 60) | int %}{{ h }}時間{% if m %}{{ m }}分{% endif %}{% endif %}</span></div>
+      <div class="rc-item"><span class="rc-label">✨ 気分</span><span class="rc-value">{{ search.purpose }}</span></div>
+      <div class="rc-item"><span class="rc-label">💴 予算</span><span class="rc-value">{{ search.budget }}</span></div>
+    </div>
+  </div>
+
+  {% if weather.hourly %}
+  <div class="hourly-chart-wrap">
+    <p class="chart-label">時間ごとの天気（降水確率・気温）</p>
+    <div class="hourly-chart">
+      {% for slot in weather.hourly %}
+      <div class="hourly-col">
+        <span class="hourly-temp">{{ slot.temperature | round(0) | int }}°</span>
+        <div class="hourly-bar-wrap">
+          <div class="hourly-bar" style="--rain: {{ slot.rain_chance }}%"></div>
+        </div>
+        <span class="hourly-rain">{{ slot.rain_chance }}%</span>
+        <span class="hourly-time">{{ slot.time }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="course-grid">
+    {% for plan in plans %}
+    <article class="course-card" data-category="{{ plan.category }}">
+
+      <!-- Course header with hero image -->
+      <div class="course-hero">
+        {% if plan.photo_url %}
+        <img class="course-hero-img" src="{{ plan.photo_url }}" alt="{{ plan.plan_title or plan.name }}" loading="lazy" onerror="this.closest('.course-hero').classList.add('no-photo')">
+        {% endif %}
+        <div class="course-hero-overlay">
+          <div class="course-hero-top">
+            <span class="course-type-badge">1日コース</span>
+            <div class="course-hero-badges">
+              {% if plan.rain_ok %}
+              <span class="badge badge-rain">☂ 雨OK</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="course-hero-bottom">
+            <h2 class="course-hero-title">{{ plan.plan_title or plan.name }}</h2>
+            <div class="course-hero-meta">
+              {% if plan.rating %}
+              <span class="course-rating">★ {{ "%.1f"|format(plan.rating) }}</span>
+              {% endif %}
+              <span class="course-spots-count">{{ plan.spots|length if plan.spots else 0 }}スポット</span>
+              <span class="course-hours">{{ plan.hours }}</span>
+            </div>
+          </div>
+        </div>
+        <button
+          class="icon-button save-button course-save {% if plan.id in saved_ids %}is-saved{% endif %}"
+          type="button"
+          aria-label="保存する"
+          data-plan-id="{{ plan.id }}"
+          data-saved="{% if plan.id in saved_ids %}true{% else %}false{% endif %}"
+        >{% if plan.id in saved_ids %}★{% else %}☆{% endif %}</button>
+      </div>
+
+      <!-- Timeline of spots -->
+      <div class="course-body">
+        {% if plan.weather_comment %}
+        <div class="plan-reason">
+          <span class="plan-reason-icon">💡</span>
+          <span class="plan-reason-text">{{ plan.weather_comment }}</span>
+        </div>
+        {% endif %}
+        {% if plan.weather_optimized %}
+        <div class="plan-weather-optimized">
+          <span>🔄 天気変化に合わせてプランを最適化しました</span>
+        </div>
+        {% endif %}
+
+        {% if plan.estimated_total_cost is defined and plan.estimated_total_cost > 0 %}
+        <div class="plan-cost">
+          <span class="plan-cost-icon">💴</span>
+          <div class="plan-cost-body">
+            <span class="plan-cost-total">合計目安: {{ plan.estimated_total_cost | yen }}</span>
+            <div class="plan-cost-breakdown">
+              {% for spot in plan.spots %}{% if spot.estimated_cost is defined and spot.estimated_cost > 0 %}
+              <span class="plan-cost-item">{{ spot.name }}: {{ spot.estimated_cost | yen }}</span>
+              {% endif %}{% endfor %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if plan.spots %}
+        <div class="course-timeline">
+          {% for spot in plan.spots %}
+          <div class="timeline-spot">
+            {% set start_h = spot.start_time.split(':')[0]|int %}
+            {% set sw = spot.spot_weather %}
+            {# 天気アイコン決定: 夜間(20時以降)は🌙、データなしは⛅ #}
+            {% if sw and start_h >= 20 and sw.rain_chance < 50 %}
+              {% set wx_icon = "🌙" %}
+            {% elif sw %}
+              {% set wx_icon = sw.weather_icon or "🌤" %}
+            {% elif start_h >= 20 %}
+              {% set wx_icon = "🌙" %}
+            {% else %}
+              {% set wx_icon = "⛅" %}
+            {% endif %}
+            <div class="tl-header">
+              <span class="tl-time">{{ spot.start_time }}</span>
+              <span class="tl-wx-icon">{{ wx_icon }}</span>
+              {% if sw %}<span class="tl-wx-temp">{{ sw.temperature | round(0) | int }}℃</span>{% endif %}
+              {% if sw and sw.rain_chance >= 80 %}
+              <span class="tl-heavy-rain">⚠️ 雨予報</span>
+              {% elif sw and sw.rain_chance >= 50 %}
+              <span class="tl-rain-rec">🏠 雨の日おすすめ</span>
+              {% endif %}
+            </div>
+            <div class="tl-body">
+              <div class="tl-vline-col">
+                <div class="timeline-vline"></div>
+                <span class="tl-end">{{ spot.end_time }}</span>
+              </div>
+              <div class="timeline-spot-content">
+                {% if spot.photo_url %}
+                <img class="timeline-spot-photo" src="{{ spot.photo_url }}" alt="{{ spot.name }}" loading="lazy" onerror="this.style.display='none'">
+                {% endif %}
+                <div class="timeline-spot-info">
+                  <p class="timeline-spot-name">
+                    {{ spot.name }}
+                    {% if spot.category_label %}<span class="cat-badge">{{ spot.category_label }}</span>{% endif %}
+                    {% if spot.trend_type == "new_opening" %}<span class="trend-badge trend-new">🆕 新規オープン</span>
+                    {% elif spot.trend_type == "event" %}<span class="trend-badge trend-event">🎪 開催中イベント</span>
+                    {% elif spot.trend_type == "local_hidden" %}<span class="trend-badge trend-local">💎 穴場</span>
+                    {% elif spot.trend_type == "trending" or spot.trend_type == "sns_popular" %}{% endif %}
+                    {% if spot.is_indoor %}<span class="indoor-badge">🏠 屋内</span>{% else %}<span class="outdoor-badge">🌳 屋外</span>{% endif %}
+                    {% if spot.source == "gemini" %}<span class="ai-badge">AI提案</span>{% endif %}
+                  </p>
+                  <div class="timeline-spot-meta">
+                    {% if spot.rating %}
+                    <span class="timeline-rating">★ {{ "%.1f"|format(spot.rating) }}</span>
+                    {% endif %}
+                    {% if spot.price and spot.price != "不明" %}
+                    <span class="timeline-price">{{ spot.price }}</span>
+                    {% endif %}
+                    {% if spot.popularity_score and spot.popularity_score > 80 %}
+                    <span class="sns-badge sns-viral" title="SNS人気スコア: {{ spot.popularity_score }}">🔥 急上昇</span>
+                    {% elif spot.popularity_score and spot.popularity_score > 65 %}
+                    <span class="sns-badge sns-hot" title="SNS人気スコア: {{ spot.popularity_score }}">⭐ 今話題</span>
+                    {% elif spot.popularity_score and spot.popularity_score > 45 %}
+                    <span class="sns-badge sns-trend" title="SNS人気スコア: {{ spot.popularity_score }}">📸 人気</span>
+                    {% endif %}
+                    {% if spot.instagram_score and spot.instagram_score > 70 %}
+                    <span class="sns-badge sns-ig" title="Instagram人気スコア: {{ spot.instagram_score }}">📷 映え</span>
+                    {% endif %}
+                    {% if spot.tiktok_score and spot.tiktok_score > 70 %}
+                    <span class="sns-badge sns-tt" title="TikTok人気スコア: {{ spot.tiktok_score }}">▶ TikTok</span>
+                    {% endif %}
+                  </div>
+                  {% if spot.address %}
+                  <p class="timeline-address">{{ spot.address }}</p>
+                  {% endif %}
+                  <div class="timeline-spot-links">
+                    <a href="{{ spot.links.map }}" target="_blank" rel="noreferrer" class="tl-link tl-link-map">Map</a>
+                    <a href="{{ spot.links.directions }}" target="_blank" rel="noreferrer" class="tl-link tl-link-dir">経路</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="course-footer">
+          <div class="tag-row">
+            {% for tag in plan.tags %}<span>{{ tag }}</span>{% endfor %}
+          </div>
+          <div class="course-footer-links">
+            <a class="spot-link spot-link-map"
+               href="{{ plan.links.map }}" target="_blank" rel="noreferrer">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+              エリアMap
+            </a>
+          </div>
+          <div class="plan-decide-row">
+            <a class="btn-plan-detail" href="{{ url_for('plan_detail', plan_id=plan.id) }}">🔍 詳細を見る</a>
+            <a class="btn-plan-decide" href="{{ url_for('plan_detail', plan_id=plan.id) }}">✅ このプランに決定</a>
+          </div>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+
+  <div class="bottom-actions">
+    <a class="button button-secondary" href="{{ url_for('input_page') }}">条件を変える</a>
+    <a class="button button-roulette" href="{{ url_for('roulette') }}">🎲 ルーレットで選ぶ</a>
+  </div>
+
+</section>
+{% endblock %}

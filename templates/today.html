@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}{{ spot.name }} | 今日ここ行こう{% endblock %}
+
+{% block content %}
+<div class="today-shell">
+
+  <!-- Blurred background photo -->
+  {% if spot.photo_url %}
+  <div class="today-bg" style="background-image:url('{{ spot.photo_url }}')"></div>
+  {% endif %}
+
+  <!-- Main card -->
+  <div class="today-card">
+
+    <!-- Photo -->
+    <div class="today-photo{% if not spot.photo_url %} no-photo{% endif %}">
+      {% if spot.photo_url %}
+      <img class="today-photo-img" src="{{ spot.photo_url }}" alt="{{ spot.name }}"
+           loading="eager" onerror="this.closest('.today-photo').classList.add('no-photo')">
+      {% endif %}
+
+      <div class="today-photo-overlay">
+        <div class="today-photo-top">
+          <div class="today-badges-left">
+            <span class="spot-type-badge">{{ spot.type }}</span>
+          </div>
+          <div class="today-badges-right">
+            {% if wtype in spot.weather_tags %}
+            <span class="badge badge-today">今日ぴったり</span>
+            {% endif %}
+            {% if spot.rain_ok %}
+            <span class="badge badge-rain">☂ 雨OK</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="today-photo-bottom">
+          {% if spot.rating %}
+          <span class="today-rating">★ {{ "%.1f"|format(spot.rating) }}</span>
+          {% endif %}
+          {% if spot.stay_time %}
+          <span class="today-stay">⏱ {{ spot.stay_time }}</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <button
+        class="today-save icon-button save-button {% if spot.id in saved_ids %}is-saved{% endif %}"
+        type="button"
+        aria-label="保存する"
+        data-plan-id="{{ spot.id }}"
+        data-saved="{% if spot.id in saved_ids %}true{% else %}false{% endif %}">
+        {% if spot.id in saved_ids %}★{% else %}☆{% endif %}
+      </button>
+    </div>
+
+    <!-- Info -->
+    <div class="today-info">
+      <h1 class="today-name">{{ spot.name }}</h1>
+
+      {% if spot.highlight %}
+      <p class="today-highlight">{{ spot.highlight }}</p>
+      {% endif %}
+
+      {% if spot.sns_reason %}
+      <div class="today-sns">
+        <span class="today-sns-icon">📸</span>
+        <p class="today-sns-text">{{ spot.sns_reason }}</p>
+      </div>
+      {% endif %}
+
+      <div class="today-meta">
+        <div class="today-meta-item">
+          <span>📍</span>
+          <span>{{ spot.area }}{% if spot.access %} · {{ spot.access }}{% endif %}</span>
+        </div>
+        {% if spot.hours and spot.hours != "要確認" %}
+        <div class="today-meta-item">
+          <span>🕐</span>
+          <span>{{ spot.hours }}</span>
+        </div>
+        {% endif %}
+        <div class="today-meta-item">
+          <span>💴</span>
+          <span>{{ spot.budget }}</span>
+        </div>
+        {% if spot.recommended_time %}
+        <div class="today-meta-item">
+          <span>✨</span>
+          <span>{{ spot.recommended_time }}</span>
+        </div>
+        {% endif %}
+      </div>
+
+      {% if spot.schedule_items %}
+      <div class="today-plan">
+        <p class="today-plan-title">📅 今日の行動プラン</p>
+        {% for item in spot.schedule_items %}
+        <div class="today-plan-row">
+          <div class="today-plan-time-col">
+            <span class="today-plan-time">{{ item.time }}</span>
+            {% if item.end_time %}<span class="today-plan-end">{{ item.end_time }}</span>{% endif %}
+          </div>
+          <div class="today-plan-body">
+            <span class="today-plan-place">{{ item.place }}</span>
+            <span class="today-plan-act">{{ item.activity }}</span>
+          </div>
+        </div>
+        {% if item.travel_min and item.travel_min > 0 %}
+        <div class="today-plan-travel">
+          <span>🚶 移動 {{ item.travel_min }}分</span>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if spot.tags %}
+      <div class="tag-row">
+        {% for tag in spot.tags %}<span>{{ tag }}</span>{% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="today-links">
+        <a class="today-link today-lk-map" href="{{ spot.links.map }}" target="_blank" rel="noreferrer">🗺 Map</a>
+        <a class="today-link today-lk-dir" href="{{ spot.links.directions }}" target="_blank" rel="noreferrer">🧭 経路</a>
+        <a class="today-link today-lk-ig"  href="{{ spot.links.instagram }}" target="_blank" rel="noreferrer">Instagram</a>
+        <a class="today-link today-lk-tt"  href="{{ spot.links.tiktok }}"    target="_blank" rel="noreferrer">TikTok</a>
+        <a class="today-link today-lk-hp"  href="{{ spot.links.hotpepper }}" target="_blank" rel="noreferrer">HP</a>
+        {% if spot.links.official %}
+        <a class="today-link today-lk-of"  href="{{ spot.links.official }}"  target="_blank" rel="noreferrer">公式</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom navigation -->
+  <nav class="today-nav">
+    <a class="today-nav-item" href="{{ url_for('index') }}">← ホーム</a>
+    <a class="today-nav-item today-nav-next"
+       href="{{ url_for('today_page', n=(current_n + 1) % total) }}">🎲 別の提案</a>
+    <a class="today-nav-item" href="{{ url_for('result') }}">全{{ total }}件 →</a>
+  </nav>
+
+</div>
+{% endblock %}

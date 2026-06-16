@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}保存一覧 | Outing Recommend{% endblock %}
+
+{% block content %}
+<section class="page-shell compact">
+  <div class="page-heading">
+    <p class="eyebrow">Saved Plans</p>
+    <h1>保存した候補</h1>
+    <p>気になった候補をあとから見返せます。</p>
+  </div>
+
+  {% if plans %}
+  <div class="saved-list">
+    {% for plan in plans %}
+    <article class="plan-card saved-card" data-favorite-card="{{ plan.id }}">
+      <div class="card-media">
+        {% if plan.photo_url %}
+        <img class="card-photo" src="{{ plan.photo_url }}" alt="{{ plan.name }}" loading="lazy" onerror="this.closest('.card-media').style.display='none'">
+        {% endif %}
+        <div class="card-media-badges">
+          <span class="spot-type-badge">{{ plan.type }}</span>
+          {% if plan.rain_ok %}
+          <span class="badge badge-rain">☂ 雨OK</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-kicker">
+          <div class="card-kicker-left">
+            <h2>{{ plan.plan_title or plan.name }}</h2>
+            {% if plan.rating %}
+            <span class="saved-rating">★ {{ "%.1f"|format(plan.rating) }}</span>
+            {% endif %}
+          </div>
+          <button
+            class="icon-button save-button is-saved"
+            type="button"
+            aria-label="保存を解除する"
+            data-plan-id="{{ plan.id }}"
+            data-saved="true"
+            data-remove-card="true"
+          >★</button>
+        </div>
+        {% if plan.highlight %}
+        <p class="spot-highlight">{{ plan.highlight }}</p>
+        {% endif %}
+        <p class="spot-desc">{{ plan.description }}</p>
+        <dl class="info-list">
+          <div><dt>エリア</dt><dd>{{ plan.area }}</dd></div>
+          {% if plan.access %}<div><dt>アクセス</dt><dd>{{ plan.access }}</dd></div>{% endif %}
+          {% if plan.hours and plan.hours != "要確認" %}<div><dt>営業時間</dt><dd>{{ plan.hours }}</dd></div>{% endif %}
+          <div><dt>予算</dt><dd>{{ plan.budget }}</dd></div>
+          {% if plan.stay_time %}<div><dt>滞在目安</dt><dd>{{ plan.stay_time }}</dd></div>{% endif %}
+          <div><dt>保存日</dt><dd>{{ plan.saved_at }}</dd></div>
+        </dl>
+        {% if plan.spots %}
+        <div class="course-timeline saved-timeline">
+          {% for spot in plan.spots %}
+          <div class="timeline-spot">
+            <div class="tl-header">
+              <span class="tl-time">{{ spot.start_time }}</span>
+            </div>
+            <div class="tl-body">
+              <div class="tl-vline-col">
+                <div class="timeline-vline"></div>
+                <span class="tl-end">{{ spot.end_time }}</span>
+              </div>
+              <div class="timeline-spot-content">
+                <div class="timeline-spot-info">
+                  <p class="timeline-spot-name">{{ spot.name }}</p>
+                  <div class="timeline-spot-meta">
+                    {% if spot.rating %}<span class="timeline-rating">★ {{ "%.1f"|format(spot.rating) }}</span>{% endif %}
+                    {% if spot.price and spot.price != "不明" %}<span class="timeline-price">{{ spot.price }}</span>{% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% elif plan.schedule_items %}
+        <div class="spot-timetable">
+          {% for item in plan.schedule_items %}
+          <div class="timetable-row">
+            <span class="timetable-time">{{ item.time }}</span>
+            <div class="timetable-info">
+              <span class="timetable-place">{{ item.place }}</span>
+              <span class="timetable-activity">{{ item.activity }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% elif plan.schedule %}
+        <p class="schedule">{{ plan.schedule }}</p>
+        {% endif %}
+        <div class="tag-row">
+          {% for tag in plan.tags %}<span>{{ tag }}</span>{% endfor %}
+        </div>
+        <div class="spot-links">
+          <a class="spot-link spot-link-map" href="{{ plan.links.map }}" target="_blank" rel="noreferrer">Map</a>
+          {% if plan.links.directions %}
+          <a class="spot-link spot-link-dir" href="{{ plan.links.directions }}" target="_blank" rel="noreferrer">経路</a>
+          {% endif %}
+          <a class="spot-link spot-link-hp" href="{{ plan.links.hotpepper }}" target="_blank" rel="noreferrer">HP</a>
+          <a class="spot-link spot-link-ig" href="{{ plan.links.instagram }}" target="_blank" rel="noreferrer">Instagram</a>
+          <a class="spot-link spot-link-tt" href="{{ plan.links.tiktok }}" target="_blank" rel="noreferrer">TikTok</a>
+          {% if plan.links.official %}
+          <a class="spot-link spot-link-official" href="{{ plan.links.official }}" target="_blank" rel="noreferrer">公式</a>
+          {% endif %}
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <p>まだ保存した候補はありません。</p>
+    <a class="button button-primary" href="{{ url_for('result') }}">候補を見る</a>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block title %}{{ plan.plan_title }} | 出発コンシェルジュ{% endblock %}
+
+{% block content %}
+<section class="pd-shell">
+
+  {# ── ヘッダー ─────────────────────────────────────────────────────────── #}
+  <div class="pd-header">
+    <div class="pd-header-top">
+      <a class="pd-back" href="{{ url_for('result') }}">← 候補一覧</a>
+      <button
+        class="icon-button save-button pd-save {% if plan.id in saved_ids %}is-saved{% endif %}"
+        type="button"
+        aria-label="保存する"
+        data-plan-id="{{ plan.id }}"
+        data-saved="{% if plan.id in saved_ids %}true{% else %}false{% endif %}"
+      >{% if plan.id in saved_ids %}★{% else %}☆{% endif %}</button>
+    </div>
+
+    <h1 class="pd-title">{{ plan.plan_title }}</h1>
+    <div class="pd-meta-row">
+      <span class="pd-date">📅 {{ today }}</span>
+      <span class="pd-hours">🕐 {{ search.start_time }}〜{{ search.end_time }}</span>
+      <span class="pd-area">📍 {{ plan.area or search.place }}</span>
+    </div>
+
+    {# 天気サマリー #}
+    {% if weather and weather.condition %}
+    <div class="pd-weather-bar">
+      <span class="pd-wx-icon">{{ weather.weather_icon or "🌤" }}</span>
+      <span class="pd-wx-cond">{{ weather.condition }}</span>
+      {% if weather.temperature and weather.temperature != "--" %}
+      <span class="pd-wx-temp">{{ weather.temperature }}℃</span>
+      {% endif %}
+      <span class="pd-wx-rain {% if weather.rain_chance|string != '--' and weather.rain_chance|int >= 50 %}is-rainy{% endif %}">
+        🌂 {{ weather.rain_chance }}%
+      </span>
+    </div>
+    {% endif %}
+
+    {% if plan.weather_optimized %}
+    <div class="plan-weather-optimized pd-optimized">
+      <span>🔄 天気変化に合わせてプランを最適化しました</span>
+    </div>
+    {% endif %}
+
+    {# 予算合計 #}
+    {% if plan.estimated_total_cost and plan.estimated_total_cost > 0 %}
+    <div class="pd-total-cost">
+      <span class="pd-cost-icon">💴</span>
+      <span>合計目安 <strong>{{ plan.estimated_total_cost | yen }}</strong></span>
+    </div>
+    {% endif %}
+  </div>
+
+  {# ── アクションタイムライン ────────────────────────────────────────────── #}
+  <div class="pd-timeline">
+    {% for spot in plan.spots %}
+    {% set sw = spot.spot_weather %}
+    {% set loop_prev = plan.spots[loop.index0 - 1] if loop.index0 > 0 else none %}
+
+    {# 移動ステップ（2件目以降） #}
+    {% if not loop.first and loop_prev %}
+    <div class="pd-travel-step">
+      <div class="pd-travel-line"></div>
+      <div class="pd-travel-body">
+        <span class="pd-travel-time">{{ loop_prev.end_time }} 出発</span>
+        <span class="pd-travel-arrow">↓</span>
+        <span class="pd-travel-min">🚶 移動 {{ spot.travel_min }}分</span>
+        <a class="pd-travel-map"
+           href="{{ spot.links.directions }}"
+           target="_blank" rel="noreferrer">経路を見る →</a>
+      </div>
+    </div>
+    {% endif %}
+
+    {# スポットカード #}
+    <div class="pd-spot-block" id="pd-spot-{{ loop.index0 }}">
+
+      {# 時刻ヘッダー #}
+      <div class="pd-spot-timehead">
+        <span class="pd-spot-starttime">{{ spot.start_time }}</span>
+        {% if sw %}
+        <span class="pd-spot-wx">
+          {{ sw.weather_icon or "🌤" }}
+          {{ sw.temperature | round(0) | int }}℃
+          🌂{{ sw.rain_chance }}%
+          {% if sw.wind_speed and sw.wind_speed >= 8 %}💨{{ sw.wind_speed }}m/s{% endif %}
+        </span>
+        {% if sw.rain_chance >= 80 %}<span class="tl-heavy-rain">⚠️ 雨予報</span>
+        {% elif sw.rain_chance >= 50 %}<span class="tl-rain-rec">🏠 雨の日おすすめ</span>
+        {% endif %}
+        {% endif %}
+      </div>
+
+      <div class="pd-spot-card">
+        {# 写真 #}
+        {% if spot.photo_url %}
+        <img class="pd-spot-photo"
+             src="{{ spot.photo_url }}"
+             alt="{{ spot.name }}"
+             loading="lazy"
+             onerror="this.style.display='none'">
+        {% endif %}
+
+        <div class="pd-spot-info">
+          {# スポット名 + バッジ #}
+          <h3 class="pd-spot-name">{{ spot.name }}</h3>
+          <div class="pd-spot-badges">
+            {% if spot.category_label %}<span class="cat-badge">{{ spot.category_label }}</span>{% endif %}
+            {% if spot.trend_type == "new_opening" %}<span class="trend-badge trend-new">🆕 新規オープン</span>
+            {% elif spot.trend_type == "event" %}<span class="trend-badge trend-event">🎪 開催中イベント</span>
+            {% elif spot.trend_type == "local_hidden" %}<span class="trend-badge trend-local">💎 穴場</span>
+            {% endif %}
+            {% if spot.is_indoor %}<span class="indoor-badge">🏠 屋内</span>
+            {% else %}<span class="outdoor-badge">🌳 屋外</span>{% endif %}
+            {% if spot.popularity_score and spot.popularity_score > 80 %}
+            <span class="sns-badge sns-viral">🔥 急上昇</span>
+            {% elif spot.popularity_score and spot.popularity_score > 65 %}
+            <span class="sns-badge sns-hot">⭐ 今話題</span>
+            {% endif %}
+          </div>
+
+          {# 評価 #}
+          {% if spot.rating %}
+          <div class="pd-spot-rating">
+            <span class="timeline-rating">★ {{ "%.1f"|format(spot.rating) }}</span>
+            {% if spot.price and spot.price != "不明" %}
+            <span class="timeline-price">{{ spot.price }}</span>
+            {% endif %}
+          </div>
+          {% endif %}
+
+          {# 混雑予測 #}
+          <div class="pd-crowd
+            {% if spot.crowd_level == 'low' %}pd-crowd-low
+            {% elif spot.crowd_level == 'medium' %}pd-crowd-medium
+            {% else %}pd-crowd-high{% endif %}">
+            {% if spot.crowd_level == 'low' %}🟢 空いている（予測）
+            {% elif spot.crowd_level == 'medium' %}🟡 やや混雑（予測）
+            {% else %}🔴 混雑（予測）{% endif %}
+          </div>
+
+          {# 予算 #}
+          {% if spot.estimated_cost and spot.estimated_cost > 0 %}
+          <div class="pd-spot-cost">
+            💴 目安 <strong>{{ spot.estimated_cost | yen }}</strong>
+          </div>
+          {% endif %}
+
+          {# 住所 #}
+          {% if spot.address %}
+          <p class="pd-spot-address">📍 {{ spot.address }}</p>
+          {% endif %}
+
+          {# 営業時間（Places APIで動的取得） #}
+          {% if spot.place_id %}
+          <div class="pd-details-wrap" data-place-id="{{ spot.place_id }}">
+            <button class="pd-details-btn" type="button">⏰ 営業時間・電話を確認</button>
+            <div class="pd-details-content" hidden></div>
+          </div>
+          {% endif %}
+
+          {# トレンド理由 #}
+          {% if spot.trend_reason %}
+          <p class="pd-trend-reason">{{ spot.trend_label }} {{ spot.trend_reason }}</p>
+          {% endif %}
+
+          {# リンク #}
+          <div class="pd-spot-links">
+            <a href="{{ spot.links.map }}" target="_blank" rel="noreferrer" class="tl-link tl-link-map">🗺 Map</a>
+            <a href="{{ spot.links.directions }}" target="_blank" rel="noreferrer" class="tl-link tl-link-dir">🧭 経路</a>
+            {% if spot.links.instagram %}
+            <a href="{{ spot.links.instagram }}" target="_blank" rel="noreferrer" class="tl-link tl-link-ig">📷 Instagram</a>
+            {% endif %}
+          </div>
+
+          {# 「行った」ボタン #}
+          <button class="pd-visited-btn"
+                  data-spot-name="{{ spot.name }}"
+                  data-plan-id="{{ plan.id }}"
+                  type="button">
+            ✓ 行った
+          </button>
+        </div>
+      </div>
+
+      {# 滞在時間バー #}
+      <div class="pd-duration-bar">
+        <span class="pd-dur-start">{{ spot.start_time }}</span>
+        <div class="pd-dur-line"></div>
+        <span class="pd-dur-end">{{ spot.end_time }}</span>
+      </div>
+
+    </div>{# /pd-spot-block #}
+    {% endfor %}
+
+    {# 終了マーカー #}
+    <div class="pd-end-marker">
+      <div class="pd-end-flag">🏁 {{ plan.spots[-1].end_time if plan.spots else search.end_time }} 終了</div>
+    </div>
+  </div>
+
+  {# ── フッターアクション ────────────────────────────────────────────────── #}
+  <div class="pd-footer-actions">
+    <a class="pd-btn-back" href="{{ url_for('result') }}">🔄 別プランを見る</a>
+    <button
+      class="pd-btn-save save-button {% if plan.id in saved_ids %}is-saved{% endif %}"
+      type="button"
+      data-plan-id="{{ plan.id }}"
+      data-saved="{% if plan.id in saved_ids %}true{% else %}false{% endif %}"
+    >{% if plan.id in saved_ids %}★ 保存済み{% else %}💾 このプランを保存{% endif %}</button>
+  </div>
+
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+window.PLAN_DETAIL = {
+  planId: {{ plan.id | tojson }},
+};
+</script>
+<script src="{{ url_for('static', filename='js/plan_detail.js') }}"></script>
+{% endblock %}

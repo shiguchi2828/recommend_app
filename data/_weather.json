@@ -1,0 +1,13 @@
+{
+  "condition": "厚い雲",
+  "temperature": "22",
+  "rain_chance": "0",
+  "summary": "東京都は厚い雲、22℃の予報です。降水確率0%。屋外寄りのスポットがおすすめです。",
+  "recommendation": "屋外寄り",
+  "location_name": "東京都",
+  "latitude": 35.6895,
+  "longitude": 139.6917,
+  "hourly": [],
+  "source": "OpenWeatherMap",
+  "weather_icon": "🌤"
+}

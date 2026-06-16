@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}ルーレット | What do?{% endblock %}
+
+{% block content %}
+<section class="rl-shell">
+
+  <div class="rl-header">
+    <p class="eyebrow">Decision Roulette</p>
+    <h1 class="rl-title">迷ったらルーレット</h1>
+    <p class="rl-desc">スポットをランダムに選ぼう！</p>
+  </div>
+
+  <div class="rl-stage">
+    <div class="rl-pointer"></div>
+    <canvas id="rouletteCanvas"></canvas>
+    <button class="rl-spin-btn" id="spinBtn" type="button">
+      <span class="rl-spin-icon">▶</span>
+      <span class="rl-spin-text">回す</span>
+    </button>
+  </div>
+
+  <!-- 当選結果 -->
+  <div class="rl-result" id="rlResult">
+    <p class="rl-result-hint">▲ ボタンを押してルーレットを回そう</p>
+  </div>
+
+  <!-- 当選プランの詳細カード（JS で挿入） -->
+  <div id="rlPlanCard" class="rl-plan-card" hidden></div>
+
+  <!-- 候補一覧 -->
+  <div class="rl-candidates" id="rlCandidates">
+    {% for plan in plans %}
+    <div class="rl-candidate" data-index="{{ loop.index0 }}">
+      <span class="rl-candidate-num">{{ loop.index }}</span>
+      <span class="rl-candidate-name">{{ plan.name }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="rl-actions">
+    <a class="button button-secondary" href="{{ url_for('result') }}">← 候補に戻る</a>
+  </div>
+
+</section>
+
+<script>
+window.ROULETTE_PLANS = {{ plans | tojson }};
+</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/roulette.js') }}"></script>
+{% endblock %}

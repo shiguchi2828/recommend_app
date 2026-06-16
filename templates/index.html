@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% set wtype = "rainy" if ("雨" in weather.condition or "雷" in weather.condition) else "cloudy" if ("くもり" in weather.condition or "霧" in weather.condition) else "sunny" %}
+{% block title %}What do? | Outing Recommend{% endblock %}
+
+{% block content %}
+<section class="home-hero">
+
+  <!-- Background slideshow -->
+  <div class="hero-slideshow" aria-hidden="true">
+    <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80')"></div>
+    <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1600&q=80')"></div>
+    <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1600&q=80')"></div>
+    <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1600&q=80')"></div>
+    <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&w=1600&q=80')"></div>
+  </div>
+
+  <div class="hero-gradient" aria-hidden="true"></div>
+  <canvas id="weatherCanvas" class="weather-canvas" aria-hidden="true"></canvas>
+
+  <!-- Centered content -->
+  <div class="hero-center">
+    <p class="hero-eyebrow">Today's pick</p>
+    <h1 class="hero-title">What do?</h1>
+    <p class="hero-sub">SNSで話題のスポットを今日の気分で探す</p>
+    <div class="hero-cta-group">
+      <a class="hero-cta" href="{{ url_for('input_page') }}">探してみる</a>
+      <a class="hero-cta-sub" href="{{ url_for('today_page') }}">今日の一件を見る</a>
+    </div>
+  </div>
+
+  <!-- Slide dots -->
+  <div class="hero-dots" id="heroDots" aria-hidden="true">
+    <span class="hero-dot is-active"></span>
+    <span class="hero-dot"></span>
+    <span class="hero-dot"></span>
+    <span class="hero-dot"></span>
+    <span class="hero-dot"></span>
+  </div>
+
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>document.body.dataset.weather = "{{ wtype }}";</script>
+<script>
+(function () {
+  /* Slide dots */
+  const dots = document.querySelectorAll('.hero-dot');
+  let cur = 0;
+  if (dots.length) {
+    setInterval(() => {
+      dots[cur].classList.remove('is-active');
+      cur = (cur + 1) % dots.length;
+      dots[cur].classList.add('is-active');
+    }, 5000);
+  }
+
+  /* Weather canvas */
+  const canvas = document.getElementById('weatherCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W = 0, H = 0, raf = null;
+
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function stop() { if (raf) { cancelAnimationFrame(raf); raf = null; } ctx.clearRect(0, 0, W, H); }
+  function start(type) { stop(); if (type === 'rainy') initRain(); else if (type === 'cloudy') initCloudy(); else initSunny(); }
+  start(document.body.dataset.weather || 'sunny');
+  new MutationObserver(ms => ms.forEach(m => { if (m.attributeName === 'data-weather') start(document.body.dataset.weather || 'sunny'); })).observe(document.body, { attributes: true });
+
+  function initRain() {
+    const COUNT = Math.min(280, Math.max(130, Math.floor(W / 4.5)));
+    const drops = Array.from({ length: COUNT }, () => newDrop(true));
+    function newDrop(s) { return { x: Math.random()*(W+300)-150, y: s?Math.random()*H:-20, len:12+Math.random()*26, spd:18+Math.random()*16, op:0.08+Math.random()*0.48, w:0.35+Math.random()*1.4 }; }
+    function tick() {
+      ctx.clearRect(0,0,W,H);
+      drops.forEach(d => { ctx.save(); ctx.globalAlpha=d.op; ctx.strokeStyle='rgba(180,220,245,1)'; ctx.lineWidth=d.w; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(d.x,d.y); ctx.lineTo(d.x+d.len*0.18,d.y+d.len); ctx.stroke(); ctx.restore(); d.x+=d.spd*0.18; d.y+=d.spd; if(d.y>H+40) Object.assign(d,newDrop(false)); });
+      raf=requestAnimationFrame(tick);
+    }
+    tick();
+  }
+
+  function initSunny() {
+    const RAYS=14; let angle=0;
+    const sparkles=Array.from({length:55},()=>{const s=newSparkle();s.phase=Math.random()*Math.PI*2;return s;});
+    function newSparkle(){return{x:60+Math.random()*(W-120),y:60+Math.random()*(H-120),size:1.5+Math.random()*5,phase:0,spd:0.005+Math.random()*0.013};}
+    function drawSparkle(x,y,size,alpha){ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle='rgba(255,253,210,0.95)';ctx.lineCap='round';const L=size*2.2;ctx.lineWidth=size*0.22;ctx.beginPath();ctx.moveTo(x-L,y);ctx.lineTo(x+L,y);ctx.stroke();ctx.beginPath();ctx.moveTo(x,y-L);ctx.lineTo(x,y+L);ctx.stroke();const D=size*1.1;ctx.lineWidth=size*0.1;ctx.globalAlpha=alpha*0.4;ctx.beginPath();ctx.moveTo(x-D,y-D);ctx.lineTo(x+D,y+D);ctx.stroke();ctx.beginPath();ctx.moveTo(x+D,y-D);ctx.lineTo(x-D,y+D);ctx.stroke();ctx.restore();}
+    function tick(){ctx.clearRect(0,0,W,H);angle+=0.005;const sx=W*0.78,sy=H*0.15,SR=Math.min(W,H)*0.088;const halo=ctx.createRadialGradient(sx,sy,SR*0.5,sx,sy,SR*5.5);halo.addColorStop(0,'rgba(255,238,80,0.24)');halo.addColorStop(0.38,'rgba(255,220,55,0.09)');halo.addColorStop(1,'rgba(255,200,40,0)');ctx.fillStyle=halo;ctx.beginPath();ctx.arc(sx,sy,SR*5.5,0,Math.PI*2);ctx.fill();for(let i=0;i<RAYS;i++){const a=angle+(i/RAYS)*Math.PI*2,inner=SR*1.1,outer=inner+SR*(0.8+Math.sin(angle*2.3+i*0.85)*0.28),rw=SR*(0.065+Math.sin(angle*3.1+i)*0.022);ctx.save();ctx.translate(sx,sy);ctx.rotate(a);const rg=ctx.createLinearGradient(0,inner,0,outer);rg.addColorStop(0,'rgba(255,238,80,0.72)');rg.addColorStop(1,'rgba(255,222,55,0)');ctx.fillStyle=rg;ctx.beginPath();ctx.moveTo(-rw,inner);ctx.lineTo(rw,inner);ctx.lineTo(rw*0.08,outer);ctx.lineTo(-rw*0.08,outer);ctx.closePath();ctx.fill();ctx.restore();}const sg=ctx.createRadialGradient(sx-SR*0.28,sy-SR*0.28,0,sx,sy,SR);sg.addColorStop(0,'#fffde7');sg.addColorStop(0.42,'#fde68a');sg.addColorStop(1,'#f7c85f');ctx.fillStyle=sg;ctx.beginPath();ctx.arc(sx,sy,SR,0,Math.PI*2);ctx.fill();ctx.save();ctx.globalAlpha=0.3+Math.sin(angle*2.8)*0.12;ctx.strokeStyle='#fff8c5';ctx.lineWidth=SR*0.055;ctx.beginPath();ctx.arc(sx,sy,SR*0.86,0,Math.PI*2);ctx.stroke();ctx.restore();sparkles.forEach(sp=>{const alpha=(Math.sin(angle*60*sp.spd+sp.phase)+1)/2;if(alpha<0.05)return;drawSparkle(sp.x,sp.y,sp.size,alpha*0.88);});raf=requestAnimationFrame(tick);}
+    tick();
+  }
+
+  function initCloudy() {
+    const clouds=Array.from({length:7},()=>newCloud(true));
+    function newCloud(s){const w=160+Math.random()*320;return{x:s?(Math.random()*(W+w)-w*0.5):-w*0.65,y:30+Math.random()*H*0.46,w,spd:0.14+Math.random()*0.28,alpha:0.38+Math.random()*0.42};}
+    function drawCloud(c){const x=c.x,y=c.y,w=c.w,h=w*0.38;ctx.save();ctx.fillStyle='rgba(218,230,242,1)';ctx.globalAlpha=c.alpha;function blob(bx,by,rx,ry){ctx.beginPath();ctx.ellipse(bx,by,rx,ry,0,0,Math.PI*2);ctx.fill();}blob(x,y,w*0.46,h*0.5);blob(x-w*0.24,y+h*0.2,w*0.28,h*0.44);blob(x+w*0.22,y+h*0.18,w*0.26,h*0.4);blob(x-w*0.06,y+h*0.32,w*0.38,h*0.3);blob(x+w*0.1,y+h*0.28,w*0.2,h*0.26);ctx.restore();}
+    function tick(){ctx.clearRect(0,0,W,H);clouds.forEach(c=>{drawCloud(c);c.x+=c.spd;if(c.x-c.w*0.6>W+60)Object.assign(c,newCloud(false));});raf=requestAnimationFrame(tick);}
+    tick();
+  }
+})();
+</script>
+{% endblock %}

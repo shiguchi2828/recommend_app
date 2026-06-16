@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+{% block title %}どこ行く？| What do?{% endblock %}
+
+{% block content %}
+<section class="input-shell">
+
+  <div class="input-bg" aria-hidden="true"></div>
+
+  <div class="input-wrap">
+
+    <!-- Header -->
+    <div class="input-header">
+      <p class="input-eyebrow">Plan Your Day</p>
+      <h1 class="input-title">どこ行く？</h1>
+      <p class="input-desc">条件を選んでSNS人気スポットを探す</p>
+    </div>
+
+    <!-- Card -->
+    <form class="input-card" action="{{ url_for('input_page') }}" method="post" data-loading-form>
+
+      <!-- 緯度経度 hidden（GPS取得時に設定） -->
+      <input type="hidden" id="userLat" name="user_lat" value="{{ search.user_lat or '' }}">
+      <input type="hidden" id="userLon" name="user_lon" value="{{ search.user_lon or '' }}">
+
+      <!-- 都道府県 + GPS -->
+      <div class="if-row">
+        <div class="if-label-row">
+          <span class="if-icon">📍</span>
+          <label class="if-label" for="place">エリア</label>
+          <button type="button" id="gpsBtn" class="if-gps-btn" title="現在地から自動入力">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+            現在地
+          </button>
+          <span id="gpsStatus" class="if-gps-status"></span>
+        </div>
+        <div class="if-select-wrap">
+          <select id="place" name="place" class="if-select {% if errors.place %}is-error{% endif %}">
+            <option value="" disabled {% if not search.place %}selected{% endif %}>選んでください</option>
+            {% for pref in [
+              "北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県",
+              "茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県",
+              "新潟県","富山県","石川県","福井県","山梨県","長野県",
+              "岐阜県","静岡県","愛知県","三重県",
+              "滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県",
+              "鳥取県","島根県","岡山県","広島県","山口県",
+              "徳島県","香川県","愛媛県","高知県",
+              "福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県"
+            ] %}
+            <option value="{{ pref }}" {% if search.place == pref %}selected{% endif %}>{{ pref }}</option>
+            {% endfor %}
+          </select>
+          <span class="if-select-arrow">▾</span>
+        </div>
+        {% if errors.place %}<p class="if-error">{{ errors.place }}</p>{% endif %}
+      </div>
+
+      <!-- 同行者 -->
+      <div class="if-row">
+        <div class="if-label-row">
+          <span class="if-icon">👥</span>
+          <label class="if-label">同行者</label>
+        </div>
+        <div class="if-chips">
+          {% for val, emoji, label in [
+            ("ひとり","🙋","ひとり"),
+            ("カップル","💑","カップル"),
+            ("友達","👫","友達"),
+            ("家族","👨‍👩‍👧","家族")
+          ] %}
+          <label class="if-chip {% if search.people == val %}is-on{% endif %}">
+            <input type="radio" name="people" value="{{ val }}" {% if search.people == val %}checked{% endif %} hidden>
+            <span class="if-chip-emoji">{{ emoji }}</span>
+            <span>{{ label }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- 時間帯 -->
+      {% set cur_start = search.start_time or '10:00' %}
+      {% set cur_end   = search.end_time   or '17:00' %}
+      <div class="if-row">
+        <div class="if-label-row">
+          <span class="if-icon">🕐</span>
+          <label class="if-label">おでかけ時間</label>
+        </div>
+        <div class="if-time-row">
+
+          <!-- 開始時間 -->
+          <div class="if-time-block">
+            <span class="if-time-label">開始</span>
+            <div class="if-select-wrap">
+              <select id="start_time" name="start_time"
+                      class="if-select if-time-select {% if errors.start_time %}is-error{% endif %}">
+                {% for h in range(6, 24) %}
+                  {% for m in [0, 30] %}
+                    {% set t = "%02d:%02d" | format(h, m) %}
+                    <option value="{{ t }}" {% if cur_start == t %}selected{% endif %}>{{ t }}</option>
+                  {% endfor %}
+                {% endfor %}
+              </select>
+              <span class="if-select-arrow">▾</span>
+            </div>
+            {% if errors.start_time %}<p class="if-error">{{ errors.start_time }}</p>{% endif %}
+          </div>
+
+          <span class="if-time-sep">→</span>
+
+          <!-- 終了時間 -->
+          <div class="if-time-block">
+            <span class="if-time-label">終了</span>
+            <div class="if-select-wrap">
+              <select id="end_time" name="end_time"
+                      class="if-select if-time-select {% if errors.end_time %}is-error{% endif %}">
+                {% for h in range(6, 24) %}
+                  {% for m in [0, 30] %}
+                    {% set t = "%02d:%02d" | format(h, m) %}
+                    <option value="{{ t }}" {% if cur_end == t %}selected{% endif %}>{{ t }}</option>
+                  {% endfor %}
+                {% endfor %}
+              </select>
+              <span class="if-select-arrow">▾</span>
+            </div>
+            {% if errors.end_time %}<p class="if-error">{{ errors.end_time }}</p>{% endif %}
+          </div>
+
+          <!-- 所要時間バッジ -->
+          {% set sh = cur_start.split(':')[0]|int %}
+          {% set sm = cur_start.split(':')[1]|int %}
+          {% set eh = cur_end.split(':')[0]|int %}
+          {% set em = cur_end.split(':')[1]|int %}
+          {% set mins = (eh * 60 + em) - (sh * 60 + sm) %}
+          <div class="if-duration {% if mins <= 0 %}is-error{% endif %}" id="durationBadge">
+            {% if mins > 0 %}{{ mins // 60 }}h{% if mins % 60 %}{{ mins % 60 }}m{% endif %}
+            {% else %}!{% endif %}
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 気分（複数選択可） -->
+      <div class="if-row">
+        <div class="if-label-row">
+          <span class="if-icon">✨</span>
+          <label class="if-label">今日の気分</label>
+          <span class="if-label-hint">複数選択OK</span>
+        </div>
+        {% set sel_purposes = search.purpose.split(',') if search.purpose else [] %}
+        <div class="if-chips" id="purposeChips">
+          {% for val, emoji, label in [
+            ("自然","🌿","自然"),
+            ("グルメ","🍜","グルメ"),
+            ("写真映え","📸","写真映え"),
+            ("温泉","♨️","温泉"),
+            ("歴史","🏯","歴史"),
+            ("アクティブ","🏃","アクティブ"),
+            ("ゆっくり","😌","ゆっくり"),
+            ("デート","❤️","デート")
+          ] %}
+          <label class="if-chip {% if val in sel_purposes %}is-on{% endif %}">
+            <input type="checkbox" name="purpose" value="{{ val }}"
+                   {% if val in sel_purposes %}checked{% endif %} hidden>
+            <span class="if-chip-emoji">{{ emoji }}</span>
+            <span>{{ label }}</span>
+          </label>
+          {% endfor %}
+        </div>
+        {% if errors.purpose %}<p class="if-error">{{ errors.purpose }}</p>{% endif %}
+      </div>
+
+      <!-- 予算 -->
+      <div class="if-row">
+        <div class="if-label-row">
+          <span class="if-icon">💴</span>
+          <label class="if-label">予算（1人あたり目安）</label>
+        </div>
+        <div class="if-chips">
+          {% for val, emoji, label in [
+            ("1,000円以内","🪙","〜1,000"),
+            ("3,000円以内","💵","〜3,000"),
+            ("5,000円以内","💳","〜5,000"),
+            ("10,000円以内","💎","〜10,000"),
+            ("15,000円以内","💰","〜15,000"),
+            ("20,000円以内","🏆","〜20,000"),
+            ("30,000円以内","👑","〜30,000"),
+            ("気にしない","✨","気にしない")
+          ] %}
+          <label class="if-chip {% if search.budget == val %}is-on{% endif %}">
+            <input type="radio" name="budget" value="{{ val }}" {% if search.budget == val %}checked{% endif %} hidden>
+            <span class="if-chip-emoji">{{ emoji }}</span>
+            <span>{{ label }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <button class="if-submit" type="submit" data-loading-text="候補を生成中...">
+        <span>スポットを探す</span>
+        <span class="if-submit-arrow">→</span>
+      </button>
+
+    </form>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  /* Chip toggle — radio (single select) */
+  document.querySelectorAll('.if-chips').forEach(group => {
+    group.querySelectorAll('input[type="radio"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        group.querySelectorAll('.if-chip').forEach(c => c.classList.remove('is-on'));
+        radio.closest('.if-chip').classList.add('is-on');
+      });
+    });
+    /* Chip toggle — checkbox (multi select) */
+    group.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        cb.closest('.if-chip').classList.toggle('is-on', cb.checked);
+      });
+    });
+  });
+
+  /* GPS 現在地 — auto-trigger on page load, also manual button */
+  const gpsBtn       = document.getElementById('gpsBtn');
+  const gpsStatus    = document.getElementById('gpsStatus');
+  const placeSelect  = document.getElementById('place');
+  const userLatInput = document.getElementById('userLat');
+  const userLonInput = document.getElementById('userLon');
+
+  function doGps(silent) {
+    if (!navigator.geolocation) {
+      if (!silent && gpsStatus) gpsStatus.textContent = '位置情報は利用できません';
+      return;
+    }
+    if (gpsBtn)   gpsBtn.disabled = true;
+    if (gpsStatus && !silent) gpsStatus.textContent = '取得中...';
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        if (userLatInput) userLatInput.value = lat.toFixed(6);
+        if (userLonInput) userLonInput.value = lon.toFixed(6);
+        try {
+          const res  = await fetch(`/api/location?lat=${lat}&lon=${lon}`);
+          const data = await res.json();
+          if (data.ok && placeSelect) {
+            const place = data.place;
+            const match = [...placeSelect.options].find(o =>
+              o.value && (o.value === place || place.includes(o.value) || o.value.includes(place.slice(0,2)))
+            );
+            if (match) {
+              placeSelect.value = match.value;
+              if (gpsStatus) { gpsStatus.textContent = `✓ ${match.value}（現在地）`; gpsStatus.style.color = '#3a8c6e'; }
+            } else {
+              if (gpsStatus && !silent) gpsStatus.textContent = `📍 ${place}（手動で選択）`;
+            }
+          }
+        } catch {
+          if (gpsStatus && !silent) { gpsStatus.textContent = '✓ 座標取得済（エリアを選択）'; gpsStatus.style.color = '#3a8c6e'; }
+        }
+        if (gpsBtn) gpsBtn.disabled = false;
+      },
+      () => {
+        if (gpsStatus && !silent) gpsStatus.textContent = '位置情報を許可してください';
+        if (gpsBtn) gpsBtn.disabled = false;
+      },
+      { timeout: 8000, maximumAge: 300000 }
+    );
+  }
+
+  /* ページ読み込み時に自動でGPS取得（エリアが未選択の場合） */
+  if (!placeSelect || !placeSelect.value) {
+    doGps(true);  // silent=true: エラーメッセージを出さない
+  }
+
+  if (gpsBtn) {
+    gpsBtn.addEventListener('click', () => doGps(false));
+  }
+
+  /* Duration badge — select版 */
+  const startSel = document.getElementById('start_time');
+  const endSel   = document.getElementById('end_time');
+  const badge    = document.getElementById('durationBadge');
+
+  function updateDuration() {
+    if (!startSel || !endSel || !badge) return;
+    const [sh, sm] = startSel.value.split(':').map(Number);
+    const [eh, em] = endSel.value.split(':').map(Number);
+    const mins = (eh * 60 + em) - (sh * 60 + sm);
+    if (mins > 0) {
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      badge.textContent = m ? `${h}h${m}m` : `${h}h`;
+      badge.classList.remove('is-error');
+      endSel.setCustomValidity('');
+    } else {
+      badge.textContent = '!';
+      badge.classList.add('is-error');
+      endSel.setCustomValidity('終了時間は開始時間より後にしてください。');
+    }
+  }
+
+  if (startSel) startSel.addEventListener('change', updateDuration);
+  if (endSel)   endSel.addEventListener('change', updateDuration);
+  updateDuration();
+})();
+</script>
+{% endblock %}

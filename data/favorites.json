@@ -1,0 +1,156 @@
+[
+  {
+    "id": "b708e7ffec00",
+    "plan_title": "日田市 ドライブ満喫コース",
+    "name": "日田市 ドライブ満喫コース",
+    "spots": [
+      {
+        "name": "一目八景展望台",
+        "start_time": "13:00",
+        "end_time": "16:26",
+        "travel_min": 48,
+        "price": "不明",
+        "rating": 4.0,
+        "photo_url": "https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=AaVGc3ksIxRiBd1MQ7HEuIyJZEGTaZe69YYA-kGdQj3hjNgWdhSSYRXQ54VNrRWnnJq0Z2DeTPoJmJwe_6ijJeg_tvsnNwBof2gQUcm-NcA05aKvQryaC3vIh2ZcB3oDwG2eMFZ6_yGrXRlV8dsJSn_h6xGoI9twfPkuvlVS1b39TlruCO118WJ-IsIhsF3XQLSuiHqfgZpJO7QJ3MNPgXZq0ht1Xqio0nowokkK8F_rAONLm2cOzonPGbVrpLXglZvt57K8LoUzmRPUmSDlU2wP9zriql1_qnismVff6cVfBGzN56iakg7EwJRMhUTq3DCsRenCRHE1eyAqRaHq8WsCUu6i63ikyw5zFdfQpJhBVXrnQbeWpxd5OnEWvFawU4Nw4DAkAZaqHkV8j_RcES-aaNUQ4v0ukB1prs_53IdQ0qMueNEc&key=AIzaSyBozIQZogIPEMMSwS3aEdV2mX8QHbR9Obo",
+        "address": "〒871-0422 大分県中津市耶馬溪町大字深耶馬",
+        "links": {
+          "map": "https://www.google.com/maps/place/?q=place_id:ChIJzaswbiFRQTUR1ohMDPcMu-Q",
+          "directions": "https://www.google.com/maps/dir/?api=1&destination=place_id:ChIJzaswbiFRQTUR1ohMDPcMu-Q",
+          "hotpepper": "https://www.hotpepper.jp/CSP/psh010/doBasic?keyword=%E4%B8%80%E7%9B%AE%E5%85%AB%E6%99%AF%E5%B1%95%E6%9C%9B%E5%8F%B0",
+          "instagram": "https://www.instagram.com/explore/tags/%E4%B8%80%E7%9B%AE%E5%85%AB%E6%99%AF%E5%B1%95%E6%9C%9B%E5%8F%B0/",
+          "tiktok": "https://www.tiktok.com/search?q=%E4%B8%80%E7%9B%AE%E5%85%AB%E6%99%AF%E5%B1%95%E6%9C%9B%E5%8F%B0",
+          "official": ""
+        },
+        "types": [
+          "establishment",
+          "point_of_interest",
+          "tourist_attraction"
+        ],
+        "source": "places",
+        "category_label": "観光名所",
+        "spot_tags": [
+          "photo",
+          "scenic",
+          "couple",
+          "friends"
+        ],
+        "latitude": 33.37186030000001,
+        "longitude": 131.1651069,
+        "popularity_score": 62.2,
+        "instagram_score": 67,
+        "tiktok_score": 58,
+        "estimated_cost": 500,
+        "is_indoor": false,
+        "spot_weather": null,
+        "trend_type": "",
+        "trend_label": "",
+        "trend_reason": "",
+        "place_id": "ChIJzaswbiFRQTUR1ohMDPcMu-Q"
+      },
+      {
+        "name": "ｵｰｶﾞﾆｯｸ農園 農家おもてなしﾚｽﾄﾗﾝ",
+        "start_time": "17:14",
+        "end_time": "21:00",
+        "travel_min": 0,
+        "price": "不明",
+        "rating": 4.2,
+        "photo_url": "https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=AaVGc3kpo5H6CBG_ia1XrObdxMjDG9-OmHGj8pslRnZKXMieo3O0MBVwTAhV8PMZM_DDejxMooOu2jB8VpyA5yQuyF_kGs76ZQ2N2eeBDazgdwoyXZR-cYPpH5t83HwD64FUZRRvaAv2hnW6vSFnWznv5_UFpFH9nOAuliErteoOP-N-xvVH_zGI0Wh9rqYdUno94Boai7CKNP8VG2JLWqy5UqeltM71mz6kNwKmY703xHuzWFIRnCDk7_qYfLppnXozySdiTHWn_yvaaqfkWFQ3JY8TnoPmOXjHcV6XMKzKMVno3xpk4jRWlo_I5W8MMvQU68yt3J13eCkkB6jpkmOoERVbkwia0TXUIsgjan7okVqT_NmF80b8RLI6GSu65Xz1RGVk2QR3X7UEXth2p3S_L3ycLAy937t7LFh9_f12r0XVvRj1&key=AIzaSyBozIQZogIPEMMSwS3aEdV2mX8QHbR9Obo",
+        "address": "〒877-0202 大分県日田市大山町東大山２７４",
+        "links": {
+          "map": "https://www.google.com/maps/place/?q=place_id:ChIJNXWbnQJrQTURTub6sZz-yYs",
+          "directions": "https://www.google.com/maps/dir/?api=1&destination=place_id:ChIJNXWbnQJrQTURTub6sZz-yYs",
+          "hotpepper": "https://www.hotpepper.jp/CSP/psh010/doBasic?keyword=%EF%BD%B5%EF%BD%B0%EF%BD%B6%EF%BE%9E%EF%BE%86%EF%BD%AF%EF%BD%B8%E8%BE%B2%E5%9C%92+%E8%BE%B2%E5%AE%B6%E3%81%8A%E3%82%82%E3%81%A6%E3%81%AA%E3%81%97%EF%BE%9A%EF%BD%BD%EF%BE%84%EF%BE%97%EF%BE%9D",
+          "instagram": "https://www.instagram.com/explore/tags/%EF%BD%B5%EF%BD%B0%EF%BD%B6%EF%BE%9E%EF%BE%86%EF%BD%AF%EF%BD%B8%E8%BE%B2%E5%9C%92%E8%BE%B2%E5%AE%B6%E3%81%8A%E3%82%82%E3%81%A6%E3%81%AA%E3%81%97%EF%BE%9A%EF%BD%BD%EF%BE%84%EF%BE%97%EF%BE%9D/",
+          "tiktok": "https://www.tiktok.com/search?q=%EF%BD%B5%EF%BD%B0%EF%BD%B6%EF%BE%9E%EF%BE%86%EF%BD%AF%EF%BD%B8%E8%BE%B2%E5%9C%92+%E8%BE%B2%E5%AE%B6%E3%81%8A%E3%82%82%E3%81%A6%E3%81%AA%E3%81%97%EF%BE%9A%EF%BD%BD%EF%BE%84%EF%BE%97%EF%BE%9D",
+          "official": ""
+        },
+        "types": [
+          "establishment",
+          "food",
+          "point_of_interest",
+          "restaurant"
+        ],
+        "source": "places",
+        "category_label": "食事",
+        "spot_tags": [
+          "gourmet",
+          "hidden_gem",
+          "couple",
+          "friends"
+        ],
+        "latitude": 33.2828164,
+        "longitude": 130.9554211,
+        "popularity_score": 41.0,
+        "instagram_score": 43,
+        "tiktok_score": 46,
+        "estimated_cost": 1800,
+        "is_indoor": true,
+        "spot_weather": null,
+        "trend_type": "",
+        "trend_label": "",
+        "trend_reason": "",
+        "place_id": "ChIJNXWbnQJrQTURTub6sZz-yYs"
+      }
+    ],
+    "schedule_items": [
+      {
+        "time": "13:00",
+        "end_time": "16:26",
+        "place": "一目八景展望台",
+        "activity": "訪問・観光",
+        "travel_min": 48
+      },
+      {
+        "time": "17:14",
+        "end_time": "21:00",
+        "place": "ｵｰｶﾞﾆｯｸ農園 農家おもてなしﾚｽﾄﾗﾝ",
+        "activity": "訪問・観光",
+        "travel_min": 0
+      }
+    ],
+    "start_time": "13:00",
+    "end_time": "21:00",
+    "total_spots": 2,
+    "photo_url": "https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=AaVGc3ksIxRiBd1MQ7HEuIyJZEGTaZe69YYA-kGdQj3hjNgWdhSSYRXQ54VNrRWnnJq0Z2DeTPoJmJwe_6ijJeg_tvsnNwBof2gQUcm-NcA05aKvQryaC3vIh2ZcB3oDwG2eMFZ6_yGrXRlV8dsJSn_h6xGoI9twfPkuvlVS1b39TlruCO118WJ-IsIhsF3XQLSuiHqfgZpJO7QJ3MNPgXZq0ht1Xqio0nowokkK8F_rAONLm2cOzonPGbVrpLXglZvt57K8LoUzmRPUmSDlU2wP9zriql1_qnismVff6cVfBGzN56iakg7EwJRMhUTq3DCsRenCRHE1eyAqRaHq8WsCUu6i63ikyw5zFdfQpJhBVXrnQbeWpxd5OnEWvFawU4Nw4DAkAZaqHkV8j_RcES-aaNUQ4v0ukB1prs_53IdQ0qMueNEc&key=AIzaSyBozIQZogIPEMMSwS3aEdV2mX8QHbR9Obo",
+    "rating": 4.1,
+    "type": "1日コース",
+    "category": "mixed",
+    "weather_tags": [
+      "sunny",
+      "cloud"
+    ],
+    "rain_ok": false,
+    "area": "日田市",
+    "address": "日田市",
+    "access": "",
+    "hours": "13:00〜21:00",
+    "budget": "気にしない",
+    "price": "スポットにより異なる",
+    "stay_time": "8時間",
+    "highlight": "ドライブを楽しみながら絶景や名所を巡るプラン",
+    "description": "ドライブを楽しみながら絶景や名所を巡るプラン",
+    "trending_reason": "",
+    "audience": "",
+    "sns_appeal": "",
+    "sns_reason": "",
+    "recommended_time": "",
+    "weather_match": "",
+    "tags": [
+      "ドライブ",
+      "絶景",
+      "アウトドア"
+    ],
+    "links": {
+      "map": "https://www.google.com/maps/place/?q=place_id:ChIJzaswbiFRQTUR1ohMDPcMu-Q",
+      "directions": "https://www.google.com/maps/dir/?api=1&destination=place_id:ChIJzaswbiFRQTUR1ohMDPcMu-Q",
+      "hotpepper": "https://www.hotpepper.jp/CSP/psh010/doBasic?keyword=%E4%B8%80%E7%9B%AE%E5%85%AB%E6%99%AF%E5%B1%95%E6%9C%9B%E5%8F%B0",
+      "instagram": "https://www.instagram.com/explore/tags/%E4%B8%80%E7%9B%AE%E5%85%AB%E6%99%AF%E5%B1%95%E6%9C%9B%E5%8F%B0/",
+      "tiktok": "https://www.tiktok.com/search?q=%E4%B8%80%E7%9B%AE%E5%85%AB%E6%99%AF%E5%B1%95%E6%9C%9B%E5%8F%B0",
+      "official": ""
+    },
+    "estimated_total_cost": 2300,
+    "weather_optimized": false,
+    "weather_comment": "晴天のドライブ日和に合わせて、車で絶景スポットを巡るコースを提案しました（日田市エリア中心）。",
+    "saved_at": "2026-06-11 22:21"
+  }
+]
